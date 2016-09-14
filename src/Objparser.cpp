@@ -3,7 +3,7 @@
 #include <iostream>
 #include <sstream>
 #include <fstream>
-#include <array>
+
 
 
 using namespace std;
@@ -12,13 +12,9 @@ Objparser::Objparser(char* filename) {
 	string line;
 	vertCount = texVertCount = elemCount = normCount = 0;
 	vector<string> tokens;
-	vector< array<float, 3> > vertVec;
-	vector< array<float, 2> > texVertVec;
-	vector< array<float, 3> > normVec;
-	vector< array<int, 9> > elemVec;
+	
 
 	ifstream inFile(filename);
-	// todo allocate buffers
 	if(inFile.is_open()) {
 		while(getline(inFile, line)) {
 			split(line, ' ', tokens);
@@ -40,7 +36,10 @@ Objparser::Objparser(char* filename) {
 					break;
 				}
 				texVertCount++;
-				// stuff
+				array<float, 2> texVert;
+				texVert[0] = stof(tokens[1]);
+				texVert[1] = stof(tokens[2]);
+				texVertVec.push_back(texVert);
 			}
 			else if(tokens[0] == "vn") {
 				if(tokens.size() > 4) {
@@ -48,7 +47,11 @@ Objparser::Objparser(char* filename) {
 					break;
 				}
 				normCount++;
-				// stuff
+				array<float, 3> norm;
+				norm[0] = stof(tokens[1]);
+				norm[1] = stof(tokens[2]);
+				norm[2] = stof(tokens[3]);
+				normVec.push_back(norm);
 			}
 			else if(tokens[0] == "f") {
 				if(tokens.size() > 4) {
@@ -56,7 +59,23 @@ Objparser::Objparser(char* filename) {
 					break;
 				}
 				elemCount++;
-				// stuff
+				array<unsigned short, 9> elem;
+				// obj format provides the vertex, texture vertex, and normal indices interleaved
+				// I have separated them here
+				for(int i = 1; i < tokens.size(); i++){
+					vector<string> triplet;
+					split(tokens[i], '/', triplet);
+					elem[0+(i-1)] = stoi(triplet[0]);
+					// if no texture coordinate was given the second element is empty
+					if(!triplet[1].empty()) {
+						elem[3+(i-1)] = stos(triplet[1]);
+					}
+					// if no vertex normal was given the triplet will just be a "doublet"
+					if(triplet.size() > 2) {
+						elem[6+(i-1)] = stos(triplet[2]);
+					}
+				}
+				elemVec.push_back(elem);
 			}
 			tokens.clear();
 		}
@@ -69,7 +88,78 @@ Objparser::~Objparser() {
 	// noop
 }
 
+void Objparser::fillVertArray(float* buffer) {
+	for(int i = 0; i < vertCount; i++) {
+		int index = i*3;
+		buffer[index] = vertVec[i][0];
+		buffer[index+1] = vertVec[i][1];
+		buffer[index+2] = vertVec[i][2];
+	}
+}
 
+void Objparser::fillUVArray(float* buffer) {
+	for(int i = 0; i < texVertCount; i++) {
+		int index = i*2;
+		buffer[index] = texVertVec[i][0];
+		buffer[index+1] = texVertVec[i][1];
+	}
+}
+
+void Objparser::fillNormArray(float* buffer) {
+	for(int i = 0; i < normCount; i++) {
+		int index = i*3;
+		buffer[index] = normVec[i][0];
+		buffer[index+1] = normVec[i][1];
+		buffer[index+2] = normVec[i][2];
+	}
+}
+
+void Objparser::fillElementArray(unsigned short* buffer, bool UVs, bool normals) {
+	int width = 3;
+	if(UVs) {
+		width += 3;
+	}
+	if(normals) {
+		width += 3;
+	}
+	for(int i = 0; i < elemCount; i++) {
+		int index = i*width;
+		buffer[index] = elemVec[i][0];
+		buffer[index+1] = elemVec[i][1];
+		buffer[index+2] = elemVec[i][2];
+		if(UVs) {
+			buffer[index+3] = elemVec[i][3];
+			buffer[index+4] = elemVec[i][4];
+			buffer[index+5] = elemVec[i][5];
+		}
+		if(normals) {
+			int offset = UVs ? 6 : 3;
+			buffer[index+offset] = elemVec[i][6];
+			buffer[index+offset+1] = elemVec[i][7];
+			buffer[index+offset+2] = elemVec[i][8];
+		}
+	}
+}
+
+int Objparser::getVertCount() {
+	return vertCount;
+}
+
+int Objparser::getTexVertCount() {
+	return texVertCount;
+}
+
+int Objparser::getNormCount() {
+	return normCount;
+}
+
+int Objparser::getElemCount() {
+	return elemCount;
+}
+
+unsigned short Objparser::stos(string s) {
+	return stoi(s);
+}
 
 void Objparser::split(const string &s, char delim, vector<string> &elems) {
     stringstream ss;
