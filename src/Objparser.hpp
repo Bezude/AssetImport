@@ -7,10 +7,10 @@
 #include <string>
 #include <array>
 
-class Objparser {
+class ObjParser {
 	public:
-		Objparser(char* filename);
-		~Objparser();
+		ObjParser(char* filename);
+		~ObjParser();
 		int getVertCount();
 		int getTexVertCount();
 		int getNormCount();

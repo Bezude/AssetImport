@@ -1,4 +1,4 @@
-#include "Objparser.hpp"
+#include "ObjParser.hpp"
 
 #include <iostream>
 #include <sstream>
@@ -8,7 +8,7 @@
 
 using namespace std;
 
-Objparser::Objparser(char* filename) {
+ObjParser::ObjParser(char* filename) {
 	string line;
 	vertCount = texVertCount = elemCount = normCount = 0;
 	vector<string> tokens;
@@ -84,11 +84,11 @@ Objparser::Objparser(char* filename) {
 	}
 }
 
-Objparser::~Objparser() {
+ObjParser::~ObjParser() {
 	// noop
 }
 
-void Objparser::fillVertArray(float* buffer) {
+void ObjParser::fillVertArray(float* buffer) {
 	for(int i = 0; i < vertCount; i++) {
 		int index = i*3;
 		buffer[index] = vertVec[i][0];
@@ -97,7 +97,7 @@ void Objparser::fillVertArray(float* buffer) {
 	}
 }
 
-void Objparser::fillUVArray(float* buffer) {
+void ObjParser::fillUVArray(float* buffer) {
 	for(int i = 0; i < texVertCount; i++) {
 		int index = i*2;
 		buffer[index] = texVertVec[i][0];
@@ -105,7 +105,7 @@ void Objparser::fillUVArray(float* buffer) {
 	}
 }
 
-void Objparser::fillNormArray(float* buffer) {
+void ObjParser::fillNormArray(float* buffer) {
 	for(int i = 0; i < normCount; i++) {
 		int index = i*3;
 		buffer[index] = normVec[i][0];
@@ -114,7 +114,7 @@ void Objparser::fillNormArray(float* buffer) {
 	}
 }
 
-void Objparser::fillElementArray(unsigned short* buffer, bool UVs, bool normals) {
+void ObjParser::fillElementArray(unsigned short* buffer, bool UVs, bool normals) {
 	int width = 3;
 	if(UVs) {
 		width += 3;
@@ -141,27 +141,27 @@ void Objparser::fillElementArray(unsigned short* buffer, bool UVs, bool normals)
 	}
 }
 
-int Objparser::getVertCount() {
+int ObjParser::getVertCount() {
 	return vertCount;
 }
 
-int Objparser::getTexVertCount() {
+int ObjParser::getTexVertCount() {
 	return texVertCount;
 }
 
-int Objparser::getNormCount() {
+int ObjParser::getNormCount() {
 	return normCount;
 }
 
-int Objparser::getElemCount() {
+int ObjParser::getElemCount() {
 	return elemCount;
 }
 
-unsigned short Objparser::stos(string s) {
+unsigned short ObjParser::stos(string s) {
 	return stoi(s);
 }
 
-void Objparser::split(const string &s, char delim, vector<string> &elems) {
+void ObjParser::split(const string &s, char delim, vector<string> &elems) {
     stringstream ss;
     ss.str(s);
     string item;
@@ -170,7 +170,7 @@ void Objparser::split(const string &s, char delim, vector<string> &elems) {
     }
 }
 
-inline void Objparser::ngonError() {
+inline void ObjParser::ngonError() {
 	cout << "A feature with more than 3 elements was found. "
 		<< "An obj being parsed may contain non-triangle faces. "
 		<< "This software only supports triangles" << '\n';

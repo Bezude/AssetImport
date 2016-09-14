@@ -1,8 +1,6 @@
 cmake_minimum_required (VERSION 3.0)
 
-project (testExec)
+project (ObjParser)
 
-set(BOOST_DIR /Users/benroye/forge/boost_1_61_0)
-
-add_executable(testExec test.cpp Objparser.hpp Objparser.cpp)
-target_include_directories(testExec PRIVATE ${BOOST_DIR})
+add_library(ObjParser ObjParser.hpp ObjParser.cpp)
+target_include_directories (ObjParser PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
